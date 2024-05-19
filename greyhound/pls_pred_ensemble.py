@@ -68,23 +68,27 @@ models = {
     "Gradient Boosting": GradientBoostingClassifier(n_estimators=100)
 }
 
-# Train and evaluate individual models
+# Train individual models
 for name, model in models.items():
     model.fit(X_train, y_train)
+    print(name + " trained")
+
+# Evaluate individual models
+for name, model in models.items():
     test_accuracy = model.score(X_test, y_test) * 100
     print(f"{name} Test Accuracy: {test_accuracy:.2f}%")
 
-# Voting Classifier
-voting_clf = VotingClassifier(estimators=list(models.items()), voting='soft')
-voting_clf.fit(X_train, y_train)
-voting_accuracy = voting_clf.score(X_test, y_test) * 100
-print(f"Voting Classifier Test Accuracy: {voting_accuracy:.2f}%")
+# Create ensemble models
+voting_hard = VotingClassifier(estimators=list(models.items()), voting='hard')
+voting_soft = VotingClassifier(estimators=list(models.items()), voting='soft')
 
-# Stacking Classifier
-stacking_clf = StackingClassifier(estimators=list(models.items()), final_estimator=LogisticRegression())
-stacking_clf.fit(X_train, y_train)
-stacking_accuracy = stacking_clf.score(X_test, y_test) * 100
-print(f"Stacking Classifier Test Accuracy: {stacking_accuracy:.2f}%")
+# Train ensemble models
+voting_hard.fit(X_train, y_train)
+voting_soft.fit(X_train, y_train)
+
+# Evaluate ensemble models
+print(f"Hard Voting Test Accuracy: {voting_hard.score(X_test, y_test) * 100:.2f}%")
+print(f"Soft Voting Test Accuracy: {voting_soft.score(X_test, y_test) * 100:.2f}%")
 
 # Market prediction accuracy
 market_data = list(zip(data['Public_Estimate'], data['Finished']))
